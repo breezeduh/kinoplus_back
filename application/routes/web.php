@@ -12,3 +12,6 @@ Route::get('test', [FilmController::class, 'index']);
 
 
 Route::apiResource('users', UsersController::class);
+
+
+Route::post('/users', [UsersController::class, 'store']);

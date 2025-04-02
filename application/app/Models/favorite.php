@@ -5,16 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class files extends Model
+class Favorite extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'file_url',
-        'file_extension',
-    ];
+    protected $fillable = ['user_id'];
 
-    public function fileable()
+    public function favoritable()
     {
         return $this->morphTo();
     }

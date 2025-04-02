@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class films_directors extends Model
+class FilmActor extends Model
 {
     use HasFactory;
 
-    protected $table = 'films_directors';
+    protected $table = 'films_actors';
     public $timestamps = false;
 
     protected $fillable = [
         'film_id',
-        'director_id',
+        'actor_id',
     ];
 }

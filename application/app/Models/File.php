@@ -5,15 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class films_actors extends Model
+class File extends Model
 {
     use HasFactory;
 
-    protected $table = 'films_actors';
-    public $timestamps = false;
-
     protected $fillable = [
-        'film_id',
-        'actor_id',
+        'file_url',
+        'file_extension',
     ];
+
+    public function fileable()
+    {
+        return $this->morphTo();
+    }
 }

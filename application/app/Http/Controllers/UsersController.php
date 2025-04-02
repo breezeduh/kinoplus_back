@@ -4,46 +4,52 @@ namespace App\Http\Controllers;
 
 use App\Models\users;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(IndexRequest $request)
     {
-        // Получение всех пользователей
-        $users = Users::all();
-        return response()->json($users);
+        $validated = $request->validated();
+
+        $perPage = $validated['perPage'] ?? 10;
+        $page = $validated['page'] ?? 1;
+
+        $users = Users::query()->paginate(
+            perPage: $perPage,
+            page: $page
+        );
+
+        return UsersResource::collection($users);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Создание нового пользователя.
      */
-    public function create()
+    public function store(StoreRequest $request)
     {
-        // Возвращает форму для создания пользователя (для API можно пропустить)
-        return response()->json(['message' => 'Provide data to create a user']);
-    }
+        try {
+            // Получение валидированных данных
+            $validated = $request->validated();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // Валидация данных
-        $validated = $request->validate([
-            'username' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
-            'first_name' => 'nullable|string|max:255',
-            'last_name' => 'nullable|string|max:255',
-        ]);
+            // Шифрование пароля
+            $validated['password'] = Hash::make($validated['password']);
 
-        // Создание пользователя
-        $user = Users::create($validated);
+            // Создание пользователя
+            $user = Users::create($validated);
 
-        return response()->json($user, 201);
+            // Возврат успешного ответа
+            return response()->json($user, 201);
+        } catch (\Exception $e) {
+            // Обработка ошибок и возврат ответа с кодом 500
+            return response()->json([
+                'error' => 'Ошибка при создании пользователя',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -56,32 +62,31 @@ class UsersController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Обновление данных пользователя.
      */
-    public function edit(Users $user)
+    public function update(UpdateRequest $request, Users $user)
     {
-        // Возвращает форму для редактирования пользователя (для API можно пропустить)
-        return response()->json(['data' => $user]);
-    }
+        try {
+            // Получение валидированных данных
+            $validated = $request->validated();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Users $user)
-    {
-        // Валидация данных
-        $validated = $request->validate([
-            'username' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8',
-            'first_name' => 'nullable|string|max:255',
-            'last_name' => 'nullable|string|max:255',
-        ]);
+            // Шифрование пароля, если он передан
+            if (isset($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
 
-        // Обновление данных пользователя
-        $user->update($validated);
+            // Обновление данных пользователя
+            $user->update($validated);
 
-        return response()->json($user);
+            // Возврат успешного ответа
+            return response()->json($user);
+        } catch (\Exception $e) {
+            // Обработка ошибок и возврат ответа с кодом 500
+            return response()->json([
+                'error' => 'Ошибка при обновлении пользователя',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
